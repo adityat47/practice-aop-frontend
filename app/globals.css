@@ -1,13 +1,17 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-
-
-@custom-variant dark (&:is(.dark *));
+/* Global body surface uses theme tokens (no gradient) */
+body {
+  min-height: 100vh;
+  width: 100%;
+  background: none;
+  background-color: var(--background);
+  color: var(--foreground);
+}
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -39,6 +43,21 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --color-text-primary: #000000;
+  --color-text-secondary: #949ca7;
+  --color-text-muted: #939393;
+  --color-white: #ffffff;
+
+  /* Status Colors */
+  --color-success: #58c681;
+  --color-failed: #ed7c63;
+  --color-page-button: #394c9d;
+
+  /* UI Colors */
+  --color-icon: #555753;
+  --color-hover: #f3f7fe;
+  --color-separator: #eff0f3;
+  --color-border: #e7e7e7;
 }
 
 .dark {
@@ -154,7 +173,7 @@
 
 /* Kadwa font helper — uses the CSS variable injected by next/font/google (fallback to serif) */
 .font-kadwa {
-  font-family: var(--font-kadwa, 'Kadwa', serif);
+  font-family: var(--font-kadwa, "Kadwa", serif);
 }
 
 /* Use tokens for app surfaces */
@@ -168,7 +187,11 @@
 
 /* Sidebar/header gradient helper */
 .sidebar-gradient {
-  background-image: linear-gradient(180deg, var(--color-brand-start), var(--color-brand-end));
+  background-image: linear-gradient(
+    180deg,
+    var(--color-brand-start),
+    var(--color-brand-end)
+  );
 }
 
 /* Header bar */
@@ -242,23 +265,4 @@ hr.separator {
   body {
     @apply bg-background text-foreground;
   }
-}
-
-/* Color System from style guide */
-:root {
-  --color-text-primary: #000000;
-  --color-text-secondary: #949CA7;
-  --color-text-muted: #939393;
-  --color-white: #FFFFFF;
-  
-  /* Status Colors */
-  --color-success: #58C681;
-  --color-failed: #ED7C63;
-  --color-page-button: #394C9D;
-  
-  /* UI Colors */
-  --color-icon: #555753;
-  --color-hover: #F3F7FE;
-  --color-separator: #EFF0F3;
-  --color-border: #E7E7E7;
 }

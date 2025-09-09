@@ -11,6 +11,20 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    rules: {
+      // Disallow `import * as React from 'react'` in favor of named imports
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "ImportNamespaceSpecifier[source.value='react']",
+          message:
+            "Use named imports from react (e.g., import { useState } from 'react') instead of namespace import.",
+        },
+      ],
+    },
+  },
 ];
 
 export default eslintConfig;

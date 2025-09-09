@@ -1,47 +1,64 @@
-"use client"
+"use client";
+import React, {  useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import api from "@/lib/axiosInstance";
+import { getUserDetails, setUserDetails } from "@/util";
+import { Loader2 } from "lucide-react";
 
-import { useState } from "react"
-import { Sidebar } from "@/components/sidebar"
-import { HeaderBar } from "@/components/header-bar"
-import { FilesTable } from "@/components/files-table"
-import { cn } from "@/lib/utils"
+const Home = () => {
+  const router = useRouter();
+  const isToken = getUserDetails();
+  const params = useSearchParams();
+  const code = params.get("code");
 
-export default function Page() {
-  const [mobileOpen, setMobileOpen] = useState(false)
 
+  useEffect(() => {
+    if (isToken?.access_token) {
+      router.push("/clients");
+    }
+    if (!isToken?.access_token && !code) {
+      location.href = process.env.NEXT_PUBLIC_KEYCLOAK_URL;
+    } else if (!isToken?.access_token && code) {
+      callback();
+    }
+  }, [code]);
+
+  async function tokenExchange(token: string) {
+    try {
+      const result = await api.get(`auth/token-exchange?token=${token}`);
+      if (result.status === 200) {
+        const { access_token, client_id } = result.data;
+        setUserDetails({ access_token, client_id });
+        router.push("/clients");
+      }
+    } catch (error) {}
+  }
+
+  async function callback() {
+    try {
+      console.log("code", code);
+      const result = await api.get(`/auth/callback?code=${code}`);
+      console.log("result", result);
+      if (result.status === 200) {
+        const { access_token } = result.data;
+        tokenExchange(access_token);
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  //1) Get code from url query parms
+  //2) If user is not logged in then call the redirect API
+  //3) If you will find code in the url query params and user is not logged in then call the callback API
+  //4) After hitting the callback API you will find the token in the API response of callback
+  //5) After getting the token from the callback API you need to call token exchange API
+  //6) In the response of token exchange API we will get all the details related to the user
   return (
-    <div className="min-h-dvh bg-background text-foreground">
-      <div className={cn("md:grid md:grid-cols-[192px_1fr] md:min-h-dvh")}>
-        {/* Sidebar (desktop) */}
-        <aside className="hidden md:block">
-          <Sidebar />
-        </aside>
-
-        {/* Main */}
-        <main className="flex min-h-dvh flex-col">
-          <HeaderBar onOpenSidebar={() => setMobileOpen(true)} />
-
-          <section className="p-3 md:p-6">
-            <div className="rounded-lg border bg-card">
-              <FilesTable />
-            </div>
-          </section>
-        </main>
-      </div>
-
-      {/* Mobile Drawer Sidebar */}
-      {mobileOpen ? (
-        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
-          <button
-            aria-label="Close sidebar"
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setMobileOpen(false)}
-          />
-          <div className="relative h-full w-48 bg-blue-600 text-white shadow-xl">
-            <Sidebar onNavigate={() => setMobileOpen(false)} />
-          </div>
-        </div>
-      ) : null}
+    <div className="flex h-screen w-full items-center justify-center">
+      <Loader2 className="animate-spin text-cyan-800" />
     </div>
-  )
-}
+  );
+};
+
+export default Home;

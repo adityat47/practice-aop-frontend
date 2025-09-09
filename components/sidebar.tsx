@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 type Props = {
@@ -11,7 +12,9 @@ type Props = {
 }
 
 // Inline SVG icon for "Clients" (uses the provided path). Uses currentColor so it inherits text color.
-function ClientsIcon({ className, ...props }: any) {
+type IconProps = React.SVGProps<SVGSVGElement> & { className?: string }
+
+function ClientsIcon({ className, ...props }: IconProps) {
   return (
     <svg
       viewBox="0 0 14 13"
@@ -26,7 +29,7 @@ function ClientsIcon({ className, ...props }: any) {
 }
 
 // Custom Dashboard icon: three bottom-aligned bars of increasing height, left and bottom axes
-function DashboardIcon({ className, ...props }: any) {
+function DashboardIcon({ className, ...props }: IconProps) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -48,7 +51,7 @@ function DashboardIcon({ className, ...props }: any) {
 }
 
 // Inline SVG icon for "Uploaded Files" (uses the provided path). Uses currentColor so it inherits text color.
-function UploadedIcon({ className, ...props }: any) {
+function UploadedIcon({ className, ...props }: IconProps) {
   return (
     <svg
       width="20"
@@ -72,15 +75,17 @@ function UploadedIcon({ className, ...props }: any) {
 
 export function Sidebar({ className, onNavigate, showLabels = true, showTitle = true }: Props) {
   const items = [
-    { label: "Clients", href: "#", icon: ClientsIcon },
-    { label: "Dashboard", href: "#", icon: DashboardIcon },
-    { label: "Uploaded Files", href: "#", icon: UploadedIcon },
-  ]
+    { label: "Clients", href: "/clients", icon: ClientsIcon },
+    { label: "Dashboard", href: "/dashboard", icon: DashboardIcon },
+    { label: "Uploaded Files", href: "/uploaded-files", icon: UploadedIcon },
+  ];
+
+  const pathname = usePathname();
 
   return (
     <nav
-      className={cn("w-48 h-full text-white", "flex flex-col gap-2 p-3", className)}
-      style={{ backgroundImage: "linear-gradient(180deg, #131C66, #3E5892)" }}
+      className={cn("w-48 h-full text-white", "flex flex-col gap-2 p-3 bg-gradient-to-b from-[#131C66] to-[#3E5892]", className)}
+      
       aria-label="Sidebar"
     >
       {showTitle && (
@@ -88,27 +93,31 @@ export function Sidebar({ className, onNavigate, showLabels = true, showTitle = 
       )}
 
       <ul className="flex flex-col gap-1">
-        {items.map(({ label, href, icon: Icon }) => (
-          <li key={label}>
-            <Link
-              href={href}
-              onClick={onNavigate}
-              className={cn(
-                "flex items-center gap-2 rounded-md px-2 py-2 text-sm",
-                "hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/60",
-              )}
-            >
-              <Icon
-                className={cn(label === "Dashboard" ? "h-5 w-5" : "h-4 w-4")}
-                aria-hidden
-              />
-              {showLabels && <span className="text-pretty">{label}</span>}
-            </Link>
-          </li>
-        ))}
+        {items.map(({ label, href, icon: Icon }) => {
+          const isActive = pathname === href;
+          return (
+            <li key={label}>
+              <Link
+                href={href}
+                onClick={onNavigate}
+                className={cn(
+                  "flex items-center gap-2 rounded-md px-2 py-2 text-sm",
+                  "hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/60",
+                  isActive && label === "Uploaded Files" && "bg-[#D9D9D93A]"
+                )}
+              >
+                <Icon
+                  className={cn(label === "Dashboard" ? "h-5 w-5" : "h-4 w-4")}
+                  aria-hidden
+                />
+                {showLabels && <span className="text-pretty">{label}</span>}
+              </Link>
+            </li>
+          );
+        })}
       </ul>
 
-      <div className="mt-auto px-2 py-2 text-[10px] opacity-70">Sidebar width: 192px</div>
+     
     </nav>
   )
 }

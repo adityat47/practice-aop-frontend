@@ -1,5 +1,17 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Env setup
+
+Create a .env.local with the following keys:
+
+- NEXT_PUBLIC_KEYCLOAK_URL: The full Keycloak auth URL to kick off login.
+- NEXT_PUBLIC_API_URL: Base URL of the backend (used by Axios instance).
+
+Example:
+
+NEXT_PUBLIC_KEYCLOAK_URL=https://auth.example.com/realms/myrealm/protocol/openid-connect/auth?client_id=...&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fapi%2Fv1%2Fauth%2Fcallback&response_type=code&scope=openid
+NEXT_PUBLIC_API_URL=http://localhost:8000
+
 ## Getting Started
 
 First, run the development server:

@@ -1,24 +1,30 @@
 "use client";
-import React, {  useEffect, useState } from "react";
+import React, {  useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/lib/axiosInstance";
-import { getUserDetails, setUserDetails } from "@/util";
-import { Loader2 } from "lucide-react";
+import { getUserDetails, setUserDetails, setClientId } from "@/util";
+
+
+type UserDetails = {
+  access_token?: string;
+  client_id?: string;
+}
 
 const Home = () => {
   const router = useRouter();
-  const isToken = getUserDetails();
+  const user: UserDetails | null = getUserDetails();
   const params = useSearchParams();
   const code = params.get("code");
 
 
   useEffect(() => {
-    if (isToken?.access_token) {
+    if (user?.access_token) {
       router.push("/clients");
     }
-    if (!isToken?.access_token && !code) {
+    if (!user?.access_token && !code) {
       location.href = process.env.NEXT_PUBLIC_KEYCLOAK_URL;
-    } else if (!isToken?.access_token && code) {
+    } else if (!user?.access_token && code) {
       callback();
     }
   }, [code]);
@@ -27,7 +33,8 @@ const Home = () => {
     try {
       const result = await api.get(`auth/token-exchange?token=${token}`);
       if (result.status === 200) {
-        const { access_token, client_id } = result.data;
+        const { access_token, client_id } = result.data as any;
+        // Persist tokens and client id (prefer body value, fallback to header)
         setUserDetails({ access_token, client_id });
         router.push("/clients");
       }
@@ -37,16 +44,22 @@ const Home = () => {
   async function callback() {
     try {
       console.log("code", code);
-      const result = await api.get(`/auth/callback?code=${code}`);
-      console.log("result", result);
+      const result = await api.get(`/auth/callback`, { params: { code } });
       if (result.status === 200) {
-        const { access_token } = result.data;
-        tokenExchange(access_token);
+        const { access_token, client_id, x_client_id } = result.data as any;
+        // Save x-client-id if present in body
+        const bodyClientId = client_id ?? x_client_id;
+        if (bodyClientId) setClientId(bodyClientId);
+        if (access_token) {
+          await tokenExchange(access_token);
+        }
       }
     } catch (error) {
-      console.log(error.message);
+      console.log((error as any)?.message || error);
     }
   }
+
+  console.log("Rendering...", code);
 
   //1) Get code from url query parms
   //2) If user is not logged in then call the redirect API

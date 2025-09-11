@@ -7,6 +7,14 @@ const nextConfig: NextConfig = {
     clientSegmentCache: true,
   },
   reactStrictMode: true,
+  async rewrites() {
+    return [
+      {
+        source: "/api/v1/:path*",
+        destination: "https://dev.ops.annovasolutions.com/api/v1/:path*",
+      },
+    ];
+  },
 };
 
 export default nextConfig;

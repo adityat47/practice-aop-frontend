@@ -1,7 +1,26 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
+import { fetchProjects } from "@/services/clients";
 import { Panel } from "@/components/panel";
+import { Result } from "postcss";
 
 export function ClientBody() {
+  const [projects, setProjects] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        // fetch all Projects
+        const result = await fetchProjects(1);
+        console.log("✅ **************Projects for client", result);
+        setProjects(result.data.data); // ⬅️ save into state
+      } catch (err) {
+        console.error("❌ Error fetching data:", err);
+      }
+    }
+    load();
+  }, []);
+
   return (
     <div className="w-full min-h-screen px-6 pb-8">
       <Panel>
@@ -15,7 +34,7 @@ export function ClientBody() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b  border-[#EFF0F3] text-[#949CA7]">
+              <tr className="border-b border-[#EFF0F3] text-[#949CA7]">
                 <th className="py-3 px-6 font-medium text-left">Projects</th>
                 <th className="py-3 px-4 font-medium text-left">Reports</th>
                 <th className="py-3 px-4 font-medium text-left">Time to pull</th>
@@ -25,9 +44,26 @@ export function ClientBody() {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td colSpan={6} className="py-8 text-center text-[#949CA7]">NO DATA CURRENTLY</td>
-              </tr>
+              {projects.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-4">
+                    No projects found
+                  </td>
+                </tr>
+              ) : (
+                projects.map((p) => (
+                  <tr key={p.report_id} className="border-b last:border-b-0">
+                    <td className="py-3 px-6">{p.project_name ?? `Project ${p.id}`}</td>
+                    <td className="py-3 px-4">{p.report_name ?? "—"}</td>
+                    <td className="py-3 px-4">{p.time_to_pull ?? "—"}</td>
+                    <td className="py-3 px-4">{p.frequency ?? "—"}</td>
+                    <td className="py-3 px-4">{p.s3_path ?? "—"}</td>
+                    <td className="py-3 px-4">
+                      <button className="text-blue-500 hover:underline">View</button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
